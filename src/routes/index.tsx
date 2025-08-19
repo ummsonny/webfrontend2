@@ -7,6 +7,7 @@ import MovieDetails from '@/routes/pages/MovieDetails'
 import SignIn from '@/routes/pages/SignIn'
 import { requireAuth, guestOnly } from '@/routes/loaders/index'
 import NotFound from '@/routes/pages/NotFound'
+import Todos from './pages/Todos'
 
 const router = createBrowserRouter([
   {
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
         path: '/signin',
         loader: guestOnly,
         element: <SignIn />
+      },
+      {
+        path: '/todos',
+        element: <Todos />
       },
       {
         path: '*',
