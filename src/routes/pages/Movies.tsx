@@ -2,34 +2,45 @@ import { useState, Fragment, useRef, useEffect } from 'react'
 import { Link } from 'react-router'
 import { useMovieStore, useInfiniteMovies } from '@/hooks/movie'
 import Loader from '@/components/Loader'
+import { useInView } from 'react-intersection-observer'
 
 export default function Movies() {
   const searchText = useMovieStore(state => state.searchText)
   const setSearchText = useMovieStore(state => state.setSearchText)
   // 한 번에 1개씩만 훅 호출로 꺼내서 사용
   const [inputText, setInputText] = useState(searchText)
-  const observerRef = useRef<HTMLDivElement>(null)
   const { data, isFetching, fetchNextPage } = useInfiniteMovies()
 
+  const { ref: observerRef, inView } = useInView({
+    rootMargin: '400px' // 뷰포트에서 400px 떨어진 곳에서 트리거
+  })
+
   useEffect(() => {
-    const io = new IntersectionObserver(
-      entries => {
-        if (entries[0].isIntersecting) {
-          // 마지막 페이지가 아니면 다음 페이지를 가져옴
-          fetchNextPage()
-        }
-      },
-      {
-        rootMargin: '400px' // 뷰포트에서 400px 떨어진 곳에서 트리거
-      }
-    )
-    if (observerRef.current) {
-      io.observe(observerRef.current)
+    if (inView) {
+      // 마지막 페이지가 아니면 다음 페이지를 가져옴
+      fetchNextPage()
     }
-    return () => {
-      io.disconnect()
-    }
-  }, [])
+  }, [inView])
+
+  // useEffect(() => {
+  //   const io = new IntersectionObserver(
+  //     entries => {
+  //       if (entries[0].isIntersecting) {
+  //         // 마지막 페이지가 아니면 다음 페이지를 가져옴
+  //         fetchNextPage()
+  //       }
+  //     },
+  //     {
+  //       rootMargin: '400px' // 뷰포트에서 400px 떨어진 곳에서 트리거
+  //     }
+  //   )
+  //   if (observerRef.current) {
+  //     io.observe(observerRef.current)
+  //   }
+  //   return () => {
+  //     io.disconnect()
+  //   }
+  // }, [])
 
   function fetchMovies() {
     setSearchText(inputText)

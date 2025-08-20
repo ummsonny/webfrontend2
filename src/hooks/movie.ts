@@ -143,9 +143,18 @@ export function useInfiniteMovies() {
     },
     initialPageParam: 1,
     enabled: !!searchText, // searchText가 비어있지 않을 때만 쿼리 실행
-    staleTime: 1000 * 60 * 60 // 1시간 동안 데이터가 신선하다고 간주
-    // select: data => {
-    //   return uniqBy(movies, 'imdbID') // 중복된 imdbID를 가진 영화는 하나만 반환
-    // }
+    staleTime: 1000 * 60 * 60, // 1시간 동안 데이터가 신선하다고 간주
+    select: data => {
+      return {
+        ...data,
+        pages: data.pages.map(page => {
+          if (!page) return page
+          return {
+            ...page,
+            Search: uniqBy(page.Search, 'imdbID')
+          }
+        })
+      }
+    }
   })
 }
