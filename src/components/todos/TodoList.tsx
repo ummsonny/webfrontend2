@@ -1,15 +1,19 @@
-import { userFetchTodos } from '@/hooks/todo'
+import { useFetchTodos } from '@/hooks/todo'
+import TodoItem from '@/components/todos/TodoItem'
 
 export default function TodoList() {
-  const { data: todos, isPending } = userFetchTodos()
+  const { data: todos, isPending } = useFetchTodos()
   return (
     <>
       <ul>
-        {todos?.map(todo => (
-          <li key={todo.id}>
-            <span>{todo.title}</span>
-          </li>
-        ))}
+        {todos?.map(todo => {
+          return (
+            <TodoItem
+              key={todo.id}
+              todo={todo}
+            />
+          )
+        })}
       </ul>
     </>
   )

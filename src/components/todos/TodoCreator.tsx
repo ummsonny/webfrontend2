@@ -2,8 +2,14 @@ import { useCreateTodo } from '@/hooks/todo'
 import { useState } from 'react'
 
 export default function TodoCreator() {
-  const { isPending, mutate } = useCreateTodo()
+  const { isPending, mutate } = useCreateTodo() // mutate는 mutationFn을 실행하는 함수
   const [title, setTitle] = useState('')
+
+  function handleCreate() {
+    if (title.trim() === '') return // Prevent empty title submission
+    mutate({ title }) // Call the mutation function with the new todo title
+    setTitle('') // Clear the input field after submission
+  }
   return (
     <div>
       <input
@@ -19,7 +25,7 @@ export default function TodoCreator() {
       />
       <button
         disabled={isPending}
-        onClick={() => mutate({ title })}>
+        onClick={() => handleCreate()}>
         Add Todo
       </button>
     </div>
