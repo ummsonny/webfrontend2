@@ -9,6 +9,7 @@ import axios from 'axios'
 import { last, uniqBy } from 'lodash-es'
 import { combine } from 'zustand/middleware'
 import { create } from 'zustand'
+import { aw } from 'node_modules/react-router/dist/development/context-DohQKLID.d.mts'
 
 export interface MoviesResponse {
   Search: Movie[]
@@ -118,6 +119,7 @@ export function useInfiniteMovies() {
     queryKey: ['movies', searchText],
     queryFn: async ({ pageParam }) => {
       if (searchText.length < 3) return
+      await new Promise(resolve => setTimeout(resolve, 1000)) // 1초 딜레이
       const { data } = await axios<MoviesResponse>(
         `https://omdbapi.com?apikey=7035c60c&s=${searchText}&page=${pageParam}`
       )

@@ -1,6 +1,7 @@
 import { useState, Fragment, useRef, useEffect } from 'react'
 import { Link } from 'react-router'
 import { useMovieStore, useInfiniteMovies } from '@/hooks/movie'
+import Loader from '@/components/Loader'
 
 export default function Movies() {
   const searchText = useMovieStore(state => state.searchText)
@@ -11,12 +12,17 @@ export default function Movies() {
   const { data, isFetching, fetchNextPage } = useInfiniteMovies()
 
   useEffect(() => {
-    const io = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) {
-        // 마지막 페이지가 아니면 다음 페이지를 가져옴
-        fetchNextPage()
+    const io = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          // 마지막 페이지가 아니면 다음 페이지를 가져옴
+          fetchNextPage()
+        }
+      },
+      {
+        rootMargin: '400px' // 뷰포트에서 400px 떨어진 곳에서 트리거
       }
-    })
+    )
     if (observerRef.current) {
       io.observe(observerRef.current)
     }
@@ -72,6 +78,15 @@ export default function Movies() {
       <div
         ref={observerRef}
         className={`${isFetching ? 'hidden' : 'block'} h-[20px]`}></div>
+
+      {isFetching && (
+        <div className="relative h-[70px]">
+          <Loader
+            size={50}
+            color="red"
+          />
+        </div>
+      )}
     </>
   )
 }
