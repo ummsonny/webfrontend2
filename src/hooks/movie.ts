@@ -1,6 +1,12 @@
-import { useQuery, queryOptions, useQueryClient } from '@tanstack/react-query'
+import {
+  useQuery,
+  queryOptions,
+  useQueryClient,
+  useInfiniteQuery,
+  useInfiniteQuery
+} from '@tanstack/react-query'
 import axios from 'axios'
-import { uniqBy } from 'lodash-es'
+import { last, uniqBy } from 'lodash-es'
 import { combine } from 'zustand/middleware'
 import { create } from 'zustand'
 
@@ -103,5 +109,41 @@ export function useMovie(movieId?: string) {
       return data
     },
     staleTime: 1000 * 60 * 60 // 1시간 동안 데이터가 신선하다고 간주
+  })
+}
+
+export function useInfiniteMovies() {
+  const searchText = useMovieStore(state => state.searchText)
+  return useInfiniteQuery({
+    queryKey: ['movies', searchText],
+    queryFn: async ({ pageParam }) => {
+      if (searchText.length < 3) return
+      const { data } = await axios<MoviesResponse>(
+        `https://omdbapi.com?apikey=7035c60c&s=${searchText}&page=${pageParam}`
+      )
+      return data
+    },
+
+    //lastPage는 마지막 페이지의 데이터. queryFn의 반환 데이터
+    //pages는 모든 페이지의 데이터 배열
+    getNextPageParam: (lastPage, pages) => {
+      if (!lastPage) return null
+      const { totalResults } = lastPage
+      const total = Number.parseInt(totalResults, 10)
+      const maxPage = Math.ceil(total / 10)
+      const currentPage = pages.length // 현재 페이지는 pages 배열의 길이
+
+      if (lastPage.Response === 'True' && currentPage < maxPage) {
+        return currentPage + 1
+      }
+
+      return null
+    },
+    initialPageParam: 1,
+    enabled: !!searchText, // searchText가 비어있지 않을 때만 쿼리 실행
+    staleTime: 1000 * 60 * 60 // 1시간 동안 데이터가 신선하다고 간주
+    // select: data => {
+    //   return uniqBy(movies, 'imdbID') // 중복된 imdbID를 가진 영화는 하나만 반환
+    // }
   })
 }
